@@ -83,7 +83,16 @@ public class GameServer {
             // Set initial position (e.g., (9, 4)) when the player joins
             Player newPlayer = new Player(playerName, 9, 4, "up");
             players.add(newPlayer);
+
+            // Notify all clients of the new player
             broadcast("UPDATE " + newPlayer.getName() + " " + newPlayer.getXpos() + " " + newPlayer.getYpos() + " " + newPlayer.getDirection());
+
+            // Optional: Inform the joining player of existing players' positions
+            for (Player p : players) {
+                if (!p.getName().equals(playerName)) {
+                    out.println("UPDATE " + p.getName() + " " + p.getXpos() + " " + p.getYpos() + " " + p.getDirection());
+                }
+            }
         }
 
         private void broadcast(String message) {

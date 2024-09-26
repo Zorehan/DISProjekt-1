@@ -171,7 +171,22 @@ public class GUI extends Application {
 				int x = Integer.parseInt(parts[2]);
 				int y = Integer.parseInt(parts[3]);
 				String direction = parts[4];
-				updatePlayer(playerName, x, y, direction);
+
+				// Update or add player to the list
+				boolean playerExists = false;
+				for (Player p : players) {
+					if (p.getName().equals(playerName)) {
+						playerExists = true;
+						updatePlayer(playerName, x, y, direction);
+						break;
+					}
+				}
+				// If the player doesn't exist, add them
+				if (!playerExists) {
+					Player newPlayer = new Player(playerName, x, y, direction);
+					players.add(newPlayer);
+					fields[x][y].setGraphic(getHeroImageForDirection(direction)); // Add new player's graphic
+				}
 			}
 		});
 	}
