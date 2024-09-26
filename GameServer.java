@@ -5,7 +5,9 @@ import java.util.*;
 public class GameServer {
     private static final int PORT = 5999;
     private static Set<PrintWriter> clientWriters = new HashSet<>();
-    private static List<Player> players = new ArrayList<>();
+    private static List<Player> players = Collections.synchronizedList(new ArrayList<>());
+
+
 
     public static void main(String[] args) {
         System.out.println("Game server started...");
@@ -22,7 +24,29 @@ public class GameServer {
         private Socket socket;
         private PrintWriter out;
         private BufferedReader in;
-        private Player player;
+
+        private String[] board = {
+                "wwwwwwwwwwwwwwwwwwww",
+                "w        ww        w",
+                "w w  w  www w  w  ww",
+                "w w  w   ww w  w  ww",
+                "w  w               w",
+                "w w w w w w w  w  ww",
+                "w w     www w  w  ww",
+                "w w     w w w  w  ww",
+                "w   w w  w  w  w   w",
+                "w     w  w  w  w   w",
+                "w ww ww        w  ww",
+                "w  w w    w    w  ww",
+                "w        ww w  w  ww",
+                "w         w w  w  ww",
+                "w        w     w  ww",
+                "w  w              ww",
+                "w  w www  w w  ww ww",
+                "w w      ww w     ww",
+                "w   w   ww  w      w",
+                "wwwwwwwwwwwwwwwwwwww"
+        };
 
         public ClientHandler(Socket socket) {
             this.socket = socket;
@@ -70,27 +94,54 @@ public class GameServer {
         }
 
         private void handleMove(String playerName, int delta_x, int delta_y, String direction) {
-            // Update player position and notify all clients
+            Player movingPlayer = null;
             for (Player p : players) {
                 if (p.getName().equals(playerName)) {
-                    p.move(delta_x, delta_y, direction);
-                    broadcast("UPDATE " + p.getName() + " " + p.getXpos() + " " + p.getYpos() + " " + p.getDirection());
+                    movingPlayer = p;
+                    break;
+                }
+            }
+
+            if (movingPlayer != null) {
+                int newX = movingPlayer.getXpos() + delta_x;
+                int newY = movingPlayer.getYpos() + delta_y;
+
+                // Check for wall collision
+                if (newX < 0 || newX >= 20 || newY < 0 || newY >= 20 || board[newY].charAt(newX) == 'w') {
+                    movingPlayer.addPoints(-1); // Deduct 1 point for hitting a wall
+                } else {
+                    // Move player
+                    movingPlayer.move(delta_x, delta_y, direction);
+                    movingPlayer.addPoints(1); // Add 1 point for moving
+                }
+
+                // Broadcast update including the score
+                broadcast("UPDATE " + movingPlayer.getName() + " " + movingPlayer.getXpos() + " " + movingPlayer.getYpos() + " " + movingPlayer.getDirection() + " " + movingPlayer.getScore());
+
+                // Check for collision with other players
+                for (Player otherPlayer : players) {
+                    if (!otherPlayer.equals(movingPlayer) && otherPlayer.getXpos() == movingPlayer.getXpos() && otherPlayer.getYpos() == movingPlayer.getYpos()) {
+                        movingPlayer.addPoints(10); // Add 10 points for colliding with another player
+                        otherPlayer.addPoints(-10); // Deduct 10 points from the other player
+                        broadcast("UPDATE " + movingPlayer.getName() + " " + movingPlayer.getXpos() + " " + movingPlayer.getYpos() + " " + movingPlayer.getDirection() + " " + movingPlayer.getScore());
+                        broadcast("UPDATE " + otherPlayer.getName() + " " + otherPlayer.getXpos() + " " + otherPlayer.getYpos() + " " + otherPlayer.getDirection() + " " + otherPlayer.getScore());
+                        break;
+                    }
                 }
             }
         }
 
-        private void handleJoin(String playerName) {
-            // Set initial position (e.g., (9, 4)) when the player joins
+
+        private synchronized void handleJoin(String playerName) {
             Player newPlayer = new Player(playerName, 9, 4, "up");
             players.add(newPlayer);
 
-            // Notify all clients of the new player
-            broadcast("UPDATE " + newPlayer.getName() + " " + newPlayer.getXpos() + " " + newPlayer.getYpos() + " " + newPlayer.getDirection());
+            broadcast("UPDATE " + newPlayer.getName() + " " + newPlayer.getXpos() + " " + newPlayer.getYpos() + " " + newPlayer.getDirection() + " " + newPlayer.getScore());
 
-            // Optional: Inform the joining player of existing players' positions
+            // Inform the joining player of existing players' positions
             for (Player p : players) {
                 if (!p.getName().equals(playerName)) {
-                    out.println("UPDATE " + p.getName() + " " + p.getXpos() + " " + p.getYpos() + " " + p.getDirection());
+                    out.println("UPDATE " + p.getName() + " " + p.getXpos() + " " + p.getYpos() + " " + p.getDirection() + " " + newPlayer.getScore());
                 }
             }
         }

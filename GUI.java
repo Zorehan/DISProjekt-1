@@ -171,19 +171,21 @@ public class GUI extends Application {
 				int x = Integer.parseInt(parts[2]);
 				int y = Integer.parseInt(parts[3]);
 				String direction = parts[4];
+				int score = Integer.parseInt(parts[5]);
 
 				// Update or add player to the list
 				boolean playerExists = false;
 				for (Player p : players) {
 					if (p.getName().equals(playerName)) {
 						playerExists = true;
-						updatePlayer(playerName, x, y, direction);
+						updatePlayer(playerName, x, y, direction, score); // Pass score to updatePlayer
 						break;
 					}
 				}
 				// If the player doesn't exist, add them
 				if (!playerExists) {
 					Player newPlayer = new Player(playerName, x, y, direction);
+					newPlayer.addPoints(0); // Initialize score for new player
 					players.add(newPlayer);
 					fields[x][y].setGraphic(getHeroImageForDirection(direction)); // Add new player's graphic
 				}
@@ -202,16 +204,18 @@ public class GUI extends Application {
 		}
 	}
 
-	private void updatePlayer(String playerName, int x, int y, String direction) {
+	private void updatePlayer(String playerName, int x, int y, String direction, int score) {
 		for (Player p : players) {
 			if (p.getName().equals(playerName)) {
 				fields[p.getXpos()][p.getYpos()].setGraphic(new ImageView(image_floor)); // Clear old position
 				p.setXpos(x);
 				p.setYpos(y);
 				p.setDirection(direction);
+				p.addPoints(score); // Update player's score
 
 				ImageView heroImage = getHeroImageForDirection(direction);
 				fields[x][y].setGraphic(heroImage);
+				updateScoreboard(); // Call a method to update the scoreboard display
 			}
 		}
 	}
@@ -225,4 +229,13 @@ public class GUI extends Application {
 			default: return new ImageView(hero_up);
 		}
 	}
+
+	private void updateScoreboard() {
+		StringBuilder scoreBuilder = new StringBuilder();
+		for (Player p : players) {
+			scoreBuilder.append(p.getName()).append(": ").append(p.getScore()).append("\n");
+		}
+		scoreList.setText(scoreBuilder.toString()); // Update the scoreList TextArea
+	}
+
 }
