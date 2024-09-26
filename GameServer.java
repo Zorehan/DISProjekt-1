@@ -3,7 +3,7 @@ import java.net.*;
 import java.util.*;
 
 public class GameServer {
-    private static final int PORT = 12345;
+    private static final int PORT = 5999;
     private static Set<PrintWriter> clientWriters = new HashSet<>();
     private static List<Player> players = new ArrayList<>();
 
@@ -80,8 +80,8 @@ public class GameServer {
         }
 
         private void handleJoin(String playerName) {
-            // Add player to game and notify all clients
-            Player newPlayer = new Player(playerName, 0, 0, "up");
+            // Set initial position (e.g., (9, 4)) when the player joins
+            Player newPlayer = new Player(playerName, 9, 4, "up");
             players.add(newPlayer);
             broadcast("UPDATE " + newPlayer.getName() + " " + newPlayer.getXpos() + " " + newPlayer.getYpos() + " " + newPlayer.getDirection());
         }

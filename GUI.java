@@ -25,7 +25,7 @@ public class GUI extends Application {
 	public static Image hero_right, hero_left, hero_up, hero_down;
 
 	public static Player me;
-	public static List<Player> players = new ArrayList<Player>();
+	public static List<Player> players = new ArrayList<>();
 
 	private Label[][] fields;
 	private TextArea scoreList;
@@ -144,7 +144,7 @@ public class GUI extends Application {
 	}
 
 	private void connectToServer() throws IOException {
-		socket = new Socket("localhost", 12345);
+		socket = new Socket("localhost", 5999);
 		out = new PrintWriter(socket.getOutputStream(), true);
 		in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 	}
@@ -164,36 +164,43 @@ public class GUI extends Application {
 	}
 
 	private void processServerMessage(String message) {
-		String[] parts = message.split(" ");
-		switch (parts[0]) {
-			case "UPDATE":
-				// Use Platform.runLater to ensure UI updates are on the JavaFX Application Thread
-				Platform.runLater(() -> updatePlayer(parts[1], Integer.parseInt(parts[2]), Integer.parseInt(parts[3]), parts[4]));
-				break;
-			case "SCORES":
-				Platform.runLater(() -> updateScores(parts[1]));
-				break;
-			// Handle other messages
+		Platform.runLater(() -> {
+			String[] parts = message.split(" ");
+			if ("UPDATE".equals(parts[0])) {
+				String playerName = parts[1];
+				int x = Integer.parseInt(parts[2]);
+				int y = Integer.parseInt(parts[3]);
+				String direction = parts[4];
+				updatePlayer(playerName, x, y, direction);
+			}
+		});
+	}
+
+	public void playerMoved(int delta_x, int delta_y, String direction) {
+		int new_x = me.getXpos() + delta_x;
+		int new_y = me.getYpos() + delta_y;
+
+		// Check if the new position is valid
+		if (new_x >= 0 && new_x < 20 && new_y >= 0 && new_y < 20 && board[new_y].charAt(new_x) != 'w') {
+			// Send move command to the server
+			out.println("MOVE " + me.getName() + " " + delta_x + " " + delta_y + " " + direction);
 		}
 	}
 
 	private void updatePlayer(String playerName, int x, int y, String direction) {
-		Player player = getPlayerByName(playerName);
-		if (player != null) {
-			Platform.runLater(() -> {
-				fields[player.getXpos()][player.getYpos()].setGraphic(new ImageView(image_floor));
-				player.setXpos(x);
-				player.setYpos(y);
-				player.setDirection(direction);
+		for (Player p : players) {
+			if (p.getName().equals(playerName)) {
+				fields[p.getXpos()][p.getYpos()].setGraphic(new ImageView(image_floor)); // Clear old position
+				p.setXpos(x);
+				p.setYpos(y);
+				p.setDirection(direction);
+
 				ImageView heroImage = getHeroImageForDirection(direction);
 				fields[x][y].setGraphic(heroImage);
-			});
+			}
 		}
 	}
 
-	private void updateScores(String scores) {
-		Platform.runLater(() -> scoreList.setText(scores));
-	}
 	private ImageView getHeroImageForDirection(String direction) {
 		switch (direction) {
 			case "right": return new ImageView(hero_right);
@@ -202,24 +209,5 @@ public class GUI extends Application {
 			case "down": return new ImageView(hero_down);
 			default: return new ImageView(hero_up);
 		}
-	}
-
-
-	private Player getPlayerByName(String playerName) {
-		for (Player p : players) {
-			if (p.getName().equals(playerName)) {
-				return p;
-			}
-		}
-		return null;
-	}
-
-	public void playerMoved(int delta_x, int delta_y, String direction) {
-		// Send move command to server
-		out.println("MOVE " + me.getName() + " " + delta_x + " " + delta_y + " " + direction);
-	}
-
-	public static void main(String[] args) {
-		launch(args);
 	}
 }
