@@ -144,7 +144,7 @@ public class GUI extends Application {
 	}
 
 	private void connectToServer() throws IOException {
-		socket = new Socket("localhost", 5999);
+		socket = new Socket("192.168.50.207", 5999);
 		out = new PrintWriter(socket.getOutputStream(), true);
 		in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 	}
