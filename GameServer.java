@@ -89,7 +89,6 @@ public class GameServer {
                 case "JOIN":
                     handleJoin(parts[1]);
                     break;
-                // Handle other messages
             }
         }
 
@@ -106,23 +105,19 @@ public class GameServer {
                 int newX = movingPlayer.getXpos() + delta_x;
                 int newY = movingPlayer.getYpos() + delta_y;
 
-                // Check for wall collision
                 if (newX < 0 || newX >= 20 || newY < 0 || newY >= 20 || board[newY].charAt(newX) == 'w') {
-                    movingPlayer.addPoints(-1); // Deduct 1 point for hitting a wall
+                    movingPlayer.addPoints(-1);
                 } else {
-                    // Move player
                     movingPlayer.move(delta_x, delta_y, direction);
-                    movingPlayer.addPoints(1); // Add 1 point for moving
+                    movingPlayer.addPoints(1);
                 }
 
-                // Broadcast update including the score
                 broadcast("UPDATE " + movingPlayer.getName() + " " + movingPlayer.getXpos() + " " + movingPlayer.getYpos() + " " + movingPlayer.getDirection() + " " + movingPlayer.getScore());
 
-                // Check for collision with other players
                 for (Player otherPlayer : players) {
                     if (!otherPlayer.equals(movingPlayer) && otherPlayer.getXpos() == movingPlayer.getXpos() && otherPlayer.getYpos() == movingPlayer.getYpos()) {
-                        movingPlayer.addPoints(10); // Add 10 points for colliding with another player
-                        otherPlayer.addPoints(-10); // Deduct 10 points from the other player
+                        movingPlayer.addPoints(10);
+                        otherPlayer.addPoints(-10);
                         broadcast("UPDATE " + movingPlayer.getName() + " " + movingPlayer.getXpos() + " " + movingPlayer.getYpos() + " " + movingPlayer.getDirection() + " " + movingPlayer.getScore());
                         broadcast("UPDATE " + otherPlayer.getName() + " " + otherPlayer.getXpos() + " " + otherPlayer.getYpos() + " " + otherPlayer.getDirection() + " " + otherPlayer.getScore());
                         break;
@@ -138,7 +133,6 @@ public class GameServer {
 
             broadcast("UPDATE " + newPlayer.getName() + " " + newPlayer.getXpos() + " " + newPlayer.getYpos() + " " + newPlayer.getDirection() + " " + newPlayer.getScore());
 
-            // Inform the joining player of existing players' positions
             for (Player p : players) {
                 if (!p.getName().equals(playerName)) {
                     out.println("UPDATE " + p.getName() + " " + p.getXpos() + " " + p.getYpos() + " " + p.getDirection() + " " + newPlayer.getScore());

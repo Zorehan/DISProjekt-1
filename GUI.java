@@ -132,15 +132,13 @@ public class GUI extends Application {
 			}
 		});
 
-		// Initial setup for players
 		me = new Player("Orville", 9, 4, "up");
 		players.add(me);
 		fields[9][4].setGraphic(new ImageView(hero_up));
 
-		// Send join message to server
 		out.println("JOIN Orville");
 
-		new Thread(new ServerListener()).start(); // Start listening for server messages
+		new Thread(new ServerListener()).start();
 	}
 
 	private void connectToServer() throws IOException {
@@ -173,21 +171,20 @@ public class GUI extends Application {
 				String direction = parts[4];
 				int score = Integer.parseInt(parts[5]);
 
-				// Update or add player to the list
 				boolean playerExists = false;
 				for (Player p : players) {
 					if (p.getName().equals(playerName)) {
 						playerExists = true;
-						updatePlayer(playerName, x, y, direction, score); // Pass score to updatePlayer
+						updatePlayer(playerName, x, y, direction, score);
 						break;
 					}
 				}
-				// If the player doesn't exist, add them
+
 				if (!playerExists) {
 					Player newPlayer = new Player(playerName, x, y, direction);
-					newPlayer.addPoints(0); // Initialize score for new player
+					newPlayer.addPoints(0);
 					players.add(newPlayer);
-					fields[x][y].setGraphic(getHeroImageForDirection(direction)); // Add new player's graphic
+					fields[x][y].setGraphic(getHeroImageForDirection(direction));
 				}
 			}
 		});
@@ -197,9 +194,8 @@ public class GUI extends Application {
 		int new_x = me.getXpos() + delta_x;
 		int new_y = me.getYpos() + delta_y;
 
-		// Check if the new position is valid
 		if (new_x >= 0 && new_x < 20 && new_y >= 0 && new_y < 20 && board[new_y].charAt(new_x) != 'w') {
-			// Send move command to the server
+
 			out.println("MOVE " + me.getName() + " " + delta_x + " " + delta_y + " " + direction);
 		}
 	}
@@ -211,11 +207,11 @@ public class GUI extends Application {
 				p.setXpos(x);
 				p.setYpos(y);
 				p.setDirection(direction);
-				p.addPoints(score); // Update player's score
+				p.addPoints(score);
 
 				ImageView heroImage = getHeroImageForDirection(direction);
 				fields[x][y].setGraphic(heroImage);
-				updateScoreboard(); // Call a method to update the scoreboard display
+				updateScoreboard();
 			}
 		}
 	}
@@ -235,7 +231,7 @@ public class GUI extends Application {
 		for (Player p : players) {
 			scoreBuilder.append(p.getName()).append(": ").append(p.getScore()).append("\n");
 		}
-		scoreList.setText(scoreBuilder.toString()); // Update the scoreList TextArea
+		scoreList.setText(scoreBuilder.toString());
 	}
 
 }
