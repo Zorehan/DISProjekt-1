@@ -24,6 +24,9 @@ public class Player {
 	public void setYpos(int ypos) { this.ypos = ypos; }
 	public void setDirection(String direction) { this.direction = direction; }
 	public void addPoints(int points) { this.score += points; }
+	public void setScore(int score) {
+		this.score = score;
+	}
 
 	public void move(int delta_x, int delta_y, String direction) {
 		this.xpos += delta_x;

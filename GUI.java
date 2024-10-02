@@ -142,7 +142,7 @@ public class GUI extends Application {
 	}
 
 	private void connectToServer() throws IOException {
-		socket = new Socket("192.168.50.207", 5999);
+		socket = new Socket("192.168.135.207", 5999);
 		out = new PrintWriter(socket.getOutputStream(), true);
 		in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 	}
@@ -194,7 +194,7 @@ public class GUI extends Application {
 		int new_x = me.getXpos() + delta_x;
 		int new_y = me.getYpos() + delta_y;
 
-		if (new_x >= 0 && new_x < 20 && new_y >= 0 && new_y < 20 && board[new_y].charAt(new_x) != 'w') {
+		if (new_x >= 0 && new_x < 20 && new_y >= 0 && new_y < 20) {
 
 			out.println("MOVE " + me.getName() + " " + delta_x + " " + delta_y + " " + direction);
 		}
@@ -203,11 +203,13 @@ public class GUI extends Application {
 	private void updatePlayer(String playerName, int x, int y, String direction, int score) {
 		for (Player p : players) {
 			if (p.getName().equals(playerName)) {
-				fields[p.getXpos()][p.getYpos()].setGraphic(new ImageView(image_floor)); // Clear old position
+				fields[p.getXpos()][p.getYpos()].setGraphic(new ImageView(image_floor));  // Clear old position
 				p.setXpos(x);
 				p.setYpos(y);
 				p.setDirection(direction);
-				p.addPoints(score);
+
+
+				p.setScore(score);
 
 				ImageView heroImage = getHeroImageForDirection(direction);
 				fields[x][y].setGraphic(heroImage);
