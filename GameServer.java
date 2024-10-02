@@ -7,10 +7,11 @@ public class GameServer {
     private static final int PORT = 5999;
     private static Set<PrintWriter> clientWriters = new HashSet<>();
     private static List<Player> players = new ArrayList<>();
-    private static ReentrantLock lock = new ReentrantLock();
+    private static ReentrantLock lock = new ReentrantLock(true);
 
     public static void main(String[] args) {
         System.out.println("Game server started...");
+        System.out.println(lock.isFair());
         try (ServerSocket serverSocket = new ServerSocket(PORT)) {
             while (true) {
                 new ClientHandler(serverSocket.accept()).start();
