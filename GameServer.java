@@ -73,7 +73,7 @@ public class GameServer {
 
         private void handleMove(String playerName, int delta_x, int delta_y, String direction) {
             System.out.println("Attempting to lock for player move: " + playerName);
-            lock.lock();  // Attempt to acquire lock
+            lock.lock();
             try {
                 System.out.println("Lock acquired for player move: " + playerName);
 
@@ -112,7 +112,7 @@ public class GameServer {
                 System.out.println("Player move processed for: " + playerName);
             } finally {
                 System.out.println("Releasing lock for player move: " + playerName);
-                lock.unlock();  // Release the lock
+                lock.unlock();
             }
         }
 

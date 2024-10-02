@@ -203,7 +203,7 @@ public class GUI extends Application {
 	private void updatePlayer(String playerName, int x, int y, String direction, int score) {
 		for (Player p : players) {
 			if (p.getName().equals(playerName)) {
-				fields[p.getXpos()][p.getYpos()].setGraphic(new ImageView(image_floor));  // Clear old position
+				fields[p.getXpos()][p.getYpos()].setGraphic(new ImageView(image_floor));
 				p.setXpos(x);
 				p.setYpos(y);
 				p.setDirection(direction);
