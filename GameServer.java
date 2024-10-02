@@ -71,8 +71,11 @@ public class GameServer {
 
 
         private void handleMove(String playerName, int delta_x, int delta_y, String direction) {
-            lock.lock();
+            System.out.println("Attempting to lock for player move: " + playerName);
+            lock.lock();  // Attempt to acquire lock
             try {
+                System.out.println("Lock acquired for player move: " + playerName);
+
                 Player movingPlayer = null;
                 for (Player p : players) {
                     if (p.getName().equals(playerName)) {
@@ -87,7 +90,6 @@ public class GameServer {
 
                     if (isWall(newX, newY)) {
                         movingPlayer.addPoints(-1);
-                        broadcast("UPDATE " + movingPlayer.getName() + " " + movingPlayer.getXpos() + " " + movingPlayer.getYpos() + " " + movingPlayer.getDirection() + " " + (movingPlayer.getScore()-1));
                     } else {
                         movingPlayer.move(delta_x, delta_y, direction);
                         movingPlayer.addPoints(1);
@@ -105,10 +107,14 @@ public class GameServer {
                         }
                     }
                 }
+
+                System.out.println("Player move processed for: " + playerName);
             } finally {
-                lock.unlock();
+                System.out.println("Releasing lock for player move: " + playerName);
+                lock.unlock();  // Release the lock
             }
         }
+
 
         private void handleJoin(String playerName) {
             lock.lock();
