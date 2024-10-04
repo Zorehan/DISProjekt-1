@@ -134,15 +134,13 @@ public class GUI extends Application {
 
 		me = new Player("Orville", 9, 4, "up");
 		players.add(me);
-		fields[9][4].setGraphic(new ImageView(hero_up));
-
 		out.println("JOIN Orville");
 
 		new Thread(new ServerListener()).start();
 	}
 
 	private void connectToServer() throws IOException {
-		socket = new Socket("192.168.135.207", 5999);
+		socket = new Socket("10.10.130.156", 5999);
 		out = new PrintWriter(socket.getOutputStream(), true);
 		in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 	}
